@@ -10,7 +10,9 @@ theme: sandstone
 library(tidyverse)
 library(here)
 library(lubridate)
+library(reshape2)
 library(ggbeeswarm)
+library(ggstance)
 theme_set(theme_bw())
 ```
 
@@ -25,24 +27,49 @@ glimpse(climas)
 
 ### Onde é mais quente?
 
+Analisando as três medidas de temperatura por semanas, média, máximo e mínimo, temos uma inconclusividade nas temperaturas máximas, onde Campina Grande tem bastante marcações em um espectro mais variado que João Pessoa.
+
+Em relação as temperaturas mínimas, podemos ver que na maioria das marcações, João Pessoa marca maiores mínimas que Campina Grande. Isso pode ser visto também quanto às médias marcadas.
+
+Assim, podemos assumir que João Pessoa é uma cidade mais quente que Campina Grande, apesar de Campina Grande marcar picos de calor mais extremos em partes do ano.
+
+```{r}
+climas_long <- melt(climas %>% select(cidade, tmedia, tmax, tmin))
+head(climas_long)
+
+ggplot(climas_long, aes(y=cidade, x=value)) + geom_point() + geom_violinh() + facet_grid(~variable, scales="free_x")
+```
 
 ### As temperaturas máximas semanais (o pico do calor) são tão diferentes quanto as médias? Mais?  
+Se olharmos os dois gráficos lado a lado, para cada cidade, as temperaturas médias registradas e as mínimas, podemos ver a distância entre a maioria das medidas. Em ambas as cidades, a maioria das máximas, são maiores que a maioria das médias registradas. Assim, há uma diferença considerável.
 
+```{r}
+climas_long <- melt(climas %>% select(cidade, tmedia, tmax))
+head(climas_long)
 
-### Quais os meses mais quentes e mais frios? 
-
-
-### Qual foi o São João  mais frio de CG que está nos nossos dados?
-
-
+ggplot(climas_long, aes(y=variable, x=value)) + geom_point() + geom_violinh() + facet_grid(~cidade, scales="free_x")
+```
 
 ## Chuva
 
-### Quanto chove por semana em JP e CG?
-
-Como é a distribuição do volume de chuvas por semana em JP e CG? A chuva varia mais ou menos que a temperatura? O formato da distribuição é igual? 
-
 ### No geral, onde chove mais?
+
+Quando olhamos a distribuição de chuvas nas duas cidades, podemos ver uma base mais larga na cidade de Campina Grande, indicando maior quantidade de períodos de estiagem na cidade. Em João Pessoa, o centro da distribuição é mais longo e grosso, indicando mais períodos de chuva na cidade, e com chuvas mais fortes que em Campina Grande. Tudo isso indica, que João Pessoa apresenta mais chuvas que Campina Grande.
+
+```{r}
+climas_long <- melt(climas %>% select(cidade, chuva))
+head(climas_long)
+
+ggplot(climas, aes(x=cidade, y=chuva)) + geom_point() + geom_violin()
+```
 
 ### A distribuição é diferente em meses específicos? 
 
+Sim, outono e inverno apresentam mais ocorrências de chuva em ambas as cidades. Entretanto para cada mês, as marcações no índice de chuva em João Pessoa são maiores.
+
+```{r}
+climas_long <- melt(climas %>% select(cidade, chuva, mes), id=c("cidade", "mes"))
+head(climas_long)
+
+ggplot(climas_long, aes(x=value, y=variable)) + geom_point() + geom_violinh() + facet_grid(mes~cidade, scales="free_x")
+```
